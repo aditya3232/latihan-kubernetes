@@ -1,6 +1,6 @@
 ## menjalankan berkas manifest
 ```bash
-kubectl apply -f pod.yml
+kubectl apply -f pod.yaml
 ```
 
 ## akses pod-ip
@@ -12,6 +12,7 @@ kubectl describe pod
 ```bash
 kubectl exec mypod -- curl http://<pod-ip>:80
 ```
+
 ## agar dapat diakses lewat host, maka butuh service (ip pod berubah2)
 - dengan service, pod (group dari beberapa container) dapat diakses internal (sesama pod) atau eksternal (host & internet)
 - service juga sebagai load balancing (mendistribusikan traffic diantara pod)
@@ -30,4 +31,16 @@ kubectl describe service webserver --> cek info Node Port
 ```bash
 kubectl describe node | grep -i address -A 1
 minikube ip
+```
+
+## Namespace
+- merupakan kubernetes object untuk mengatur cluster menjadi sub cluster virtual
+- biasanya untuk memisahkan sejumlah resource yang berbeda didalam cluster
+- misal mengisolasi resource berdasarkan tim, proyek, env (dev,test,prod), aplikasi, dll
+- object yang tidak bisa masuk namespace adalah node & peristance volume
+- yang bisa pod, deployment, & service
+```bash
+kubectl get namespace
+kubectl delete pod mypod && kubectl delete service webserver
+kubectl apply -f pod.yaml -n webserver-ns && kubectl apply -f service.yaml -n webserver-ns --> buat pod & service pada namespace webserver-ns
 ```
