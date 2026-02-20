@@ -6,10 +6,13 @@ metadata:
     app: microservices
     tier: app
 spec:
-  maxReplicas: 5
-  minReplicas: 2
-  scaleTargetRef:
+  maxReplicas: 5 # max replicas
+  minReplicas: 2 # min replicas
+  scaleTargetRef: # mendefinisikan target yang akan dilakukan autoscale yaitu deployment app-tier
     apiVersion: apps/v1
     kind: Deployment
     name: app-tier
-  targetCPUUtilizationPercentage: 70
+  targetCPUUtilizationPercentage: 70 # target penggunaan cpu untuk seluruh replica
+
+
+# akan mengurangi replica jika penggunaan cpu < 70% dan meningkatkan replica jika > 70%

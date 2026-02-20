@@ -1,26 +1,26 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: data-tier
+  name: data-tier # nama service
   labels:
     app: microservices
 spec:
   ports:
-  - port: 6379
-    protocol: TCP 
-    name: redis
+    - port: 6379 # ekspos port redis
+      protocol: TCP
+      name: redis
   selector:
-    tier: data 
+    tier: data # group untuk pod yang memakai service ini
   type: ClusterIP
----
+--- # memisahkan object service & deployment dalam 1 dokumen manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: data-tier
+  name: data-tier # nama metada bisa disamakan dengan service (1 aplikasi)
   labels:
     app: microservices
-    tier: data
-spec:
+    tier: data # group service data-tier
+spec: # spesifikasi container
   replicas: 1
   selector:
     matchLabels:
@@ -29,24 +29,24 @@ spec:
     metadata:
       labels:
         app: microservices
-        tier: data
+        tier: data # container menjadi bagian dari service & deployment
     spec:
       containers:
-      - name: redis
-        image: redis:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-          - containerPort: 6379
-        command:
-          - redis-server
-          - /etc/redis/redis.conf
-        volumeMounts:
-          - mountPath: /etc/redis
-            name: config
+        - name: redis
+          image: redis:latest
+          imagePullPolicy: IfNotPresent # image hanya diunduh bila tidak tersedia secara lokal
+          ports:
+            - containerPort: 6379
+          command:
+            - redis-server
+            - /etc/redis/redis.conf
+          volumeMounts:
+            - mountPath: /etc/redis
+              name: config
       volumes:
         - name: config
           configMap:
             name: redis-config
             items:
-            - key: config
-              path: redis.conf
+              - key: config
+                path: redis.conf
