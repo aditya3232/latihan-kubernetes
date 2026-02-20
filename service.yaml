@@ -1,13 +1,12 @@
-    apiVersion: v1
-    kind: Service
-    metadata:
-      labels:
-        app: webserver
-      name: webserver
-    spec:
-      ports:
-      - port: 80
-      selector:
-        app: webserver
-      type: NodePort
-
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: webserver # label yang sama dengan pod (app:webserver)
+  name: webserver # name service
+spec:
+  ports:
+    - port: 80 # mengekspose port 80
+  selector:
+    app: webserver # menarget pod yang kita buat sebelumnya
+  type: NodePort
