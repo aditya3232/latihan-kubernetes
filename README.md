@@ -109,3 +109,27 @@ kubectl run -it --rm --image=mysql:5.6 --restart=Never --namespace=stateful-ns m
 kubectl get pod -n stateful-ns --> lihat nama pod mysql
 kubectl delete pod mysql-79c846684f-c5r8k -n stateful-ns --> delete pod mysql
 ```
+
+## ConfigMap & Secret
+- ConfigMap & Secret digunakan untuk memisahkan konfigurasi dari pod atau deployment manifest
+- dengan begitu dapat memudahkan untuk mengelola dan mengubah konfigurasi (tidak perlu menyentuh deployment manifest lagi)
+- ConfigMap & Secret menyimpan data sebagai key value
+- untuk menggunakannya, pod harus mereferensikan ConfigMap & Secret terlebih dahulu
+
+## ConfigMap
+- ConfigMap digunakan untuk menyimpan informasi yg tidak sensitif
+- seperti konfigurasi aplikasi & database host
+
+## Secret
+- dipakai untuk menyimpan informasi yg bersifat sensitif
+- seperti password, token, api key
+- dengan menggunakan secret, resiko pengeksposan data menjadi lebih minim
+```bash
+kubectl get all -n deployments --> cek object yg ada di namespace deployments [counter application di praktek Deployment]
+kubectl apply -f data-tier-configmap.yaml -f data-tier.yaml -n deployments --> Nah, dengan begini, kita dapat mengonfigurasi Redis secara terpisah tanpa harus menyentuh Deployment manifest ini lagi ke depannya
+kubectl exec -it -n deployments data-tier-d7747df69-f99tt -- /bin/bash --> masuk ke data-tier container
+Setelah masuk, silakan konten dari berkas konfigurasi Redis. --> cat /etc/redis/redis.conf 
+
+kubectl describe secret app-tier-secret -n deployments --> informasi detail dari secret
+exec -n deployments app-tier-c77fb5fd-tbvtf -- env --> lihat semua env
+```

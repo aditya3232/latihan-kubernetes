@@ -37,15 +37,15 @@ spec: # spesifikasi container
           imagePullPolicy: IfNotPresent # image hanya diunduh bila tidak tersedia secara lokal
           ports:
             - containerPort: 6379
-          command:
+          command: # command agar redis dapat membuat berkas konfigurasi saat ia dimulai dgn perintah redis-server /etc/redis/redis.conf
             - redis-server
             - /etc/redis/redis.conf
-          volumeMounts:
-            - mountPath: /etc/redis
+          volumeMounts: # relative path.  path lengkap (absolute path) untuk config adalah /etc/redis/redis.conf
+            - mountPath: /etc/redis # mount path pd volume bernama config
               name: config
-      volumes:
-        - name: config
-          configMap:
+      volumes: # volume ini mereferensikan ke config map bernama redis-config yg telah dibuat sebelumnya, dgn menunjukkan key bernama config dan path yg merujuk ke lokasi file yg akan di mount
+        - name: config # volume dgn nama config
+          configMap: # memiliki tipe configMap
             name: redis-config
             items:
               - key: config
