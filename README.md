@@ -133,3 +133,37 @@ Setelah masuk, silakan konten dari berkas konfigurasi Redis. --> cat /etc/redis/
 kubectl describe secret app-tier-secret -n deployments --> informasi detail dari secret
 exec -n deployments app-tier-c77fb5fd-tbvtf -- env --> lihat semua env
 ```
+
+## StatefulSet
+- Deployment lebih cocok untuk stateless application
+- karena pod yang dibuatnya selalu berubah-ubah
+- mekanisme ini tidak cocok untuk pada stateful application
+- StatefulSet ini adalah kubernetes object untuk mengelola stateful application
+- Berbeda dengan Deployment, StatefulSet akan menyimpan identitas unik dari setiap Pod yang dikelolanya
+- Ia menggunakan identitas yang sama setiap kali perlu meluncurkan ulang Pod
+- StatefulSet menyediakan 2 identitas unik yang stabil untuk setiap Pod :
+- Network Identity (identitas jaringan) yang memungkinkan kita untuk menetapkan DNS name yang sama ke suatu Pod, tak peduli berapa kali Pod tersebut di-restart
+- Storage Identity (identitas penyimpanan) yang memungkinkan untuk mendapatkan Storage instance yang sama, tak peduli di Node mana Pod tersebut diluncurkan
+- berbeda dengan Deployment, StatefulSet tidak membuat ReplicaSet. Controller StatefulSet langsung mengelola Pod satu per satu
+- Deployment
+   └── ReplicaSet
+          └── Pod
+- StatefulSet
+    └── Pod (langsung dikelola controller StatefulSet)
+- StatefulSet pakai konsep : Setiap replica akan dibuatkan PVC masing-masing
+- mysql-0  → pakai PVC mysql-data-mysql-0
+- mysql-1  → pakai PVC mysql-data-mysql-1
+- jadi mysql kalau ada 2, biasanya menerapkan sinkronisasi data
+- mysql-0 → primary
+- mysql-1 → replica (replication)
+- Sinkronisasi datanya dilakukan oleh MySQL replication
+```bash
+kubectl create namespace statefulset-ns
+kubectl apply -f mysql-secret.yaml -n statefulset-ns --> manifest untuk menyimpan password mysql
+kubectl apply -f mysql-pv.yaml -n statefulset-ns --> deploy pv
+kubectl apply -f mysql-pvc.yaml -n statefulset-ns --> deploy pvc
+kubectl apply -f mysql-service.yaml -n statefulset-ns --> headless service [biasa untuk persistent volume]
+kubectl apply -f mysql-statefulset.yaml -n statefulset-ns --> deploy manifest StatefulSet
+kubectl get statefulset,service,po,pv,pvc -n statefulset-ns --> periksa semua object Stateful App Mysql
+kubectl get pod -o wide -n statefulset-ns --> cek pod yg dibuat oleh stateful set
+```
