@@ -1,42 +1,43 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql
+  name: mysql # nama service
 spec:
   ports:
-  - port: 3306
+    - port: 3306 # ekspose port 3306
   selector:
-    app: mysql
-  clusterIP: None
+    app: mysql # selector group untuk service
+  clusterIP: None # headless service, tidak mengalokasikan ip address untuk service yg dibuat
+  # headless service biasanya digunakan untuk membuat stateful application
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: mysql # nama deployment
 spec:
   selector:
     matchLabels:
       app: mysql
   strategy:
-    type: Recreate
+    type: Recreate # semua pod akan dihentikan sebelum yg baru dibuat
   template:
     metadata:
       labels:
         app: mysql
-    spec:
+    spec: # spec container
       containers:
-      - image: mysql:5.6
-        name: mysql
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: password
-        ports:
-        - containerPort: 3306
+        - image: mysql:5.6
           name: mysql
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage # volume mount
+              mountPath: /var/lib/mysql # mount path
       volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: mysql-pv-claim
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim # pvc

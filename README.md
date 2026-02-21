@@ -1,4 +1,8 @@
 ## Pod
+- pod merupakan sebuah group yang terdiri dari 1 atau beberapa container (umumnya 1 container)
+- pod mempresentasikan sebuah unit aplikasi
+- pod terdiri dari container (1 atau lebih), volume (penyimpanan), ip address (komunikasi jaringan)  
+- pod merupakan unit terkecil dari kubernetes
 - menjalankan berkas manifest
 ```bash
 kubectl apply -f pod.yaml
@@ -76,4 +80,32 @@ kubectl top pods -n deployments --> melihat daftar penggunaan cpu dan memory unt
 kubectl apply -f hpa.yaml -n deployments --> mendeklarasikan object HPA
 kubectl get deployment -n deployments --watch --> memeriksa kondisi deployment secara realtime
 kubectl describe hpa -n deployments --> periksa detail HPA; atau lebih ringkas kubectl get hpa -n deployments 
+```
+
+## Volume
+- volume melakat pada pod
+- karena melekat pada pod (bukan pada container), data akan tetap bertahan meski container restart
+- digunakan untuk berbagi data diantara container dalam pod yg sama
+- sifatnya volume ikut terhapus saat pod dihapus (karena scaling)
+- umumnya volume digunakan untuk kebutuhan penyimpanan sementara
+
+## Persistent Volume
+- persistent volume tidak melakat pada pod
+- dikelola secara terpisah oleh kubernetes
+- meski pod dihapus, data akan tetap bertahan
+- pod mesti membuat claim sebelum dapat menggunakan persistent volume (PVC)
+- persistent volume claim (PVC), kita mendefinisikan jml penyimpanan yg dibutuhkan pod, jenis pv yg digunakan, & access mode yg dipakai
+- ada 3 access mode: read-only many (volume dapat dipasang read-only oleh banyak node), 
+- read-write once (volume dipasang sebagai read-write oleh satu node),
+- read-write many (volume dapat dipasang sebagai read-write oleh banyak node)
+```bash
+kubectl apply -f stateful-ns.yaml --> namespace 
+kubectl apply -f stateful-ns.yaml -->  deploy PVC
+kubectl apply -f mysql-svc-deploy.yaml -n stateful-ns --> deploy service dan pod 
+kubectl describe deployment mysql -n stateful-ns --> periksa deployment mysql
+kubectl describe pvc mysql-pv-claim -n stateful-ns --> periksa pvc
+kubectl describe pv mysql-pv-volume -n stateful-ns --> periksa mysql pv
+kubectl run -it --rm --image=mysql:5.6 --restart=Never --namespace=stateful-ns mysql-client -- mysql -h mysql -ppassword --> jalankan mysql client untuk terhubung ke server
+kubectl get pod -n stateful-ns --> lihat nama pod mysql
+kubectl delete pod mysql-79c846684f-c5r8k -n stateful-ns --> delete pod mysql
 ```
