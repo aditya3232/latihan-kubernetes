@@ -4,6 +4,7 @@
 - pod terdiri dari container (1 atau lebih), volume (penyimpanan), ip address (komunikasi jaringan)  
 - pod merupakan unit terkecil dari kubernetes
 - menjalankan berkas manifest
+- biasanya kita tak perlu membuat pod secara langsung, sebagai gantinya, kita membuat pod menggunakan deployment
 ```bash
 kubectl apply -f pod.yaml
 ```
@@ -12,6 +13,9 @@ kubectl apply -f pod.yaml
 kubectl describe pod
 ```
 - akses didalam container
+- karena jaringan pod masih terisolasi dgn host
+- untuk sementara, kita bisa melakukan request dari container di dalam pod
+- isi <pod-ip> dengan ip address dari pod yg tampil saat menjalankan perintah ``kubectl describe pod``
 ```bash
 kubectl exec mypod -- curl http://<pod-ip>:80
 ```

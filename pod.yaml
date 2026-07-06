@@ -1,10 +1,10 @@
 apiVersion: v1
-kind: Pod # mendefinisikan resource yang didefinisikan (Pod)
+kind: Pod # mendefinisikan kubernetes object (pod)
 metadata: # informasi tambahan
   name: mypod
   labels: # selector service. service menemukan pod melalui label (service discovery)
     app: webserver
-spec: # tempat menspesifikasikan resource
+spec: # tempat menspesifikasikan resource (pod yg berisi container)
   containers:
     - name: mycontainer
       image: nginx:latest
