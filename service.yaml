@@ -9,4 +9,4 @@ spec:
     - port: 80 # mengekspose port 80
   selector:
     app: webserver # menarget pod yang kita buat sebelumnya
-  type: NodePort
+  type: NodePort # tipe ini membuat service dapat diakses dari luar cluster menggunakan format -> <NodeIP>:<NodePort>

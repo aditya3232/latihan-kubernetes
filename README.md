@@ -27,7 +27,7 @@ kubectl exec mypod -- curl http://<pod-ip>:80
 - dan service discovery (mekanisme dimana pod dapat menemukan pod lain secara dinamis)
 - tipe service:
 - ClusterIP (default): membuat service hanya dapat dijangkau dari dalam cluster (internal). antara pod bisa akses lewat name service atau dns record
-- NodePort: membuat service dapat diakses dari luar cluster menggunakan format <NodeIP>:<NodePort>
+- NodePort: membuat service dapat diakses dari luar cluster menggunakan format -> NodeIP:NodePort
 - LoadBalancer: membuat sebuah external load balancer di cloud provider (jika didukung) dan menetapkan public IP address yang tetap (fixed) ke Service
 - ExternalName:  memetakan Service ke konten dari externalName field (contoh: foo.bar.example.com) dengan mengembalikan CNAME record beserta nilainya
 ```bash
