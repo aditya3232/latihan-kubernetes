@@ -63,6 +63,7 @@ kubectl apply -f pod.yaml -n webserver-ns && kubectl apply -f service.yaml -n we
 - app-tier.yaml --> berupa Node.js server yang menerima POST request untuk menambah nilai dari counter dan GET request untuk mendapatkan nilai terbaru dari counter
 - support-tier.yaml --> berupa multi-container Pod (2 container di dalam satu Pod) yang berperan sebagai counter (kontinu membuat POST request ke server dengan nilai acak) dan poller (kontinu membuat GET request ke server dan mencetak nilai)
 ```bash
+kubectl apply -f deployment-ns.yaml **[1]**
 kubectl apply -f data-tier.yaml -f app-tier.yaml -f support-tier.yaml -n deployments
 kubectl get deployment -n deployments
 kubectl get pod -n deployments
@@ -78,10 +79,10 @@ kubectl logs support-tier-54564dbbc6-v5lv6 poller -f -n deployments
 - target cpu 60%; min replicas 2; max replicas 5
 - proses HPA sangat bergantung pada metric yg dikumpulkan di cluster menggunakan object (metrics server)
 ```bash
-kubectl apply -f metric-server.yaml --> deploy metric-server
-kubectl get pods -n kube-system --> konfirmasi metric server sudah berjalan
+kubectl apply -f metric-server.yaml --> deploy metric-server **[2]**
+kubectl get pods -n kube-system --> konfirmasi metric server sudah berjalan **[3]**
 kubectl top pods -n deployments --> melihat daftar penggunaan cpu dan memory untuk setiap pod pada suatu namespace
-kubectl apply -f hpa.yaml -n deployments --> mendeklarasikan object HPA
+kubectl apply -f hpa.yaml -n deployments --> mendeklarasikan object HPA **[4]**
 kubectl get deployment -n deployments --watch --> memeriksa kondisi deployment secara realtime
 kubectl describe hpa -n deployments --> periksa detail HPA; atau lebih ringkas kubectl get hpa -n deployments 
 ```
@@ -103,15 +104,26 @@ kubectl describe hpa -n deployments --> periksa detail HPA; atau lebih ringkas k
 - read-write once (volume dipasang sebagai read-write oleh satu node),
 - read-write many (volume dapat dipasang sebagai read-write oleh banyak node)
 ```bash
-kubectl apply -f stateful-ns.yaml --> namespace 
-kubectl apply -f stateful-ns.yaml -->  deploy PVC
+kubectl apply -f stateful-ns.yaml --> namespace
+kubectl apply -f mysql-pv-pvc.yaml -n stateful-ns -->  deploy PVC
 kubectl apply -f mysql-svc-deploy.yaml -n stateful-ns --> deploy service dan pod 
 kubectl describe deployment mysql -n stateful-ns --> periksa deployment mysql
 kubectl describe pvc mysql-pv-claim -n stateful-ns --> periksa pvc
 kubectl describe pv mysql-pv-volume -n stateful-ns --> periksa mysql pv
 kubectl run -it --rm --image=mysql:5.6 --restart=Never --namespace=stateful-ns mysql-client -- mysql -h mysql -ppassword --> jalankan mysql client untuk terhubung ke server
+CREATE DATABASE my_database; -> buat db
+USE my_database; -> gunakan db
+CREATE TABLE pet (name VARCHAR(20), owner VARCHAR(20), species VARCHAR(20), sex CHAR(1), birth DATE, death DATE); -> create table
+SHOW TABLES; -> show table
+DESCRIBE pet; -> lihat struktur tabel
+INSERT INTO pet VALUES ('Oyen', 'Budi', 'Kucing', 'J', '1945-08-17', NULL); -> masukkan data
+SELECT * FROM pet; -> select data
+exit -> exit kalau sudah
 kubectl get pod -n stateful-ns --> lihat nama pod mysql
 kubectl delete pod mysql-79c846684f-c5r8k -n stateful-ns --> delete pod mysql
+kubectl get pod -n stateful-ns -> Lihat status Pod kembali. Kubernetes akan menambahkan Pod baru (namanya akan berbeda).
+kubectl run -it --rm --image=mysql:5.6 --restart=Never --namespace=stateful-ns mysql-client -- mysql -h mysql -ppassword -> jalankan db kembali
+SHOW DATABASES; -> pastika data di database tetap tersedia
 ```
 
 ## ConfigMap & Secret
@@ -130,12 +142,15 @@ kubectl delete pod mysql-79c846684f-c5r8k -n stateful-ns --> delete pod mysql
 - dengan menggunakan secret, resiko pengeksposan data menjadi lebih minim
 ```bash
 kubectl get all -n deployments --> cek object yg ada di namespace deployments [counter application di praktek Deployment]
-kubectl apply -f data-tier-configmap.yaml -f data-tier.yaml -n deployments --> Nah, dengan begini, kita dapat mengonfigurasi Redis secara terpisah tanpa harus menyentuh Deployment manifest ini lagi ke depannya
+kubectl apply -f data-tier-configmap.yaml -f data-tier.yaml -n deployments --> Nah, dengan begini, kita dapat mengonfigurasi Redis secara terpisah tanpa harus menyentuh Deployment manifest ini lagi ke depannya **[5]**
 kubectl exec -it -n deployments data-tier-d7747df69-f99tt -- /bin/bash --> masuk ke data-tier container
 Setelah masuk, silakan konten dari berkas konfigurasi Redis. --> cat /etc/redis/redis.conf 
 
-kubectl describe secret app-tier-secret -n deployments --> informasi detail dari secret
-exec -n deployments app-tier-c77fb5fd-tbvtf -- env --> lihat semua env
+kubectl apply -f app-tier-secret.yaml -n deployments **[6]**
+kubectl describe secret app-tier-secret -n deployments --> informasi detail dari secret **[7]**
+kubectl apply -f app-tier.yaml -n deployments **[8]**
+kubectl logs support-tier-6b568b56ff-h6p4g poller -f -n deployments -> cek apakah aplikasi jalan **[9]**
+kubectl exec -n deployments app-tier-75d875d498-8dvq8 -- env --> lihat semua env
 ```
 
 ## StatefulSet
@@ -170,4 +185,9 @@ kubectl apply -f mysql-service.yaml -n statefulset-ns --> headless service [bias
 kubectl apply -f mysql-statefulset.yaml -n statefulset-ns --> deploy manifest StatefulSet
 kubectl get statefulset,service,po,pv,pvc -n statefulset-ns --> periksa semua object Stateful App Mysql
 kubectl get pod -o wide -n statefulset-ns --> cek pod yg dibuat oleh stateful set
+
+==ujicoba==
+
+kubectl delete pod mysql-0 -n statefulset-ns -> silahkan hapus salah satu pod
+kubectl get pod -o wide -n statefulset-ns -> periksa kembali kondisi dari pod, maka mysql-0 akan diluncurkan kembali
 ```
